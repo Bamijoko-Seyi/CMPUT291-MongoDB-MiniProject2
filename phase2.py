@@ -2,15 +2,22 @@ import pymongo
 from pymongo import MongoClient
 import pprint
 
-port_no = input("Please enter your port number: ")
-client = MongoClient("mongodb://localhost:" + port_no)
-db = client["291db"]
-tweets = db["tweets"]
+def connect_to_mongodb():
+    try:
+        port_no = input("Please enter your port number: ")
+        client = MongoClient("mongodb://localhost:" + port_no)
+        db = client["291db"]
+        tweets = db["tweets"]
 
-#creates the indexes need for the functions to work
-tweets.create_index([("user.username", "text"), ("content", "text"), ("location", "text")], name='compound_text_index', default_language='english', textIndexVersion=3)
+        # creates the indexes needed for the functions to work
+        tweets.create_index([("user.username", "text"), ("content", "text"), ("location", "text")], name='compound_text_index', default_language='english', textIndexVersion=3)
 
-def search_tweets():
+        return tweets
+    except pymongo.errors.ConnectionFailure as error:
+        print(f"Error connecting to MongoDB: {error}")
+        return None
+
+def search_tweets(tweets):
     exit_function = False
     while not exit_function:
         user_input = input("Enter keywords to search for tweets (separate by commas if they are multiple): ")
@@ -59,8 +66,7 @@ def search_tweets():
                 exit_function = True
                 break
 
-        
-def search_users():
+def search_users(tweets):
     exit_function = False
     while exit_function == False:
         user_input = input("Enter a keyword to search for : ")
@@ -132,14 +138,19 @@ def search_users():
                 break
 
 def main():
-    end_program = False
-    while not end_program:
-        user_input = input("Please select an option: \n1 - Search for tweets \n2 - Search for users \n6 - Exit the program \ninput: ")
-        if user_input == "1":
-            search_tweets()
-        elif user_input == "2":
-            search_users()
-        elif user_input == "6":
-            end_program = True
+    tweets = connect_to_mongodb()
+
+    if tweets != None:
+        end_program = False
+        while not end_program:
+            user_input = input("Please select an option: \n1 - Search for tweets \n2 - Search for users \n6 - Exit the program \ninput: ")
+            if user_input == "1":
+                search_tweets(tweets)
+            elif user_input == "2":
+                search_users(tweets)
+            elif user_input == "6":
+                end_program = True
+    else:
+        print("Exiting program due to connection error.")
 
 main()
