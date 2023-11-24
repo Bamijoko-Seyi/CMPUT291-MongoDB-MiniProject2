@@ -137,20 +137,59 @@ def search_users(tweets):
                 exit_function = True
                 break
 
+def list_top_tweets(tweets):
+    field = input("Enter the field to sort by (retweetCount, likeCount, quoteCount): ")
+    if field not in ['retweetCount', 'likeCount', 'quoteCount']:
+        print("Invalid field. Please enter one of 'retweetCount', 'likeCount', 'quoteCount'.")
+        return
+
+    try:
+        n = int(input("Enter the number of top tweets to list: "))
+    except ValueError:
+        print("Invalid number entered.")
+        return
+
+    results = tweets.find().sort(field, pymongo.DESCENDING).limit(n)
+    tweet_ids = []
+    for tweet in results:
+        tweet_ids.append(tweet["id"])
+        print(f'ID: {tweet["id"]} | Date: {tweet["date"]} | Content: {tweet["content"]} | Username: {tweet["user"]["username"]}')
+
+    tweet_id = input("Enter tweet ID to see full details or press Enter to go back: ")
+    if tweet_id:
+        if tweet_id in tweet_ids:
+            detailed_tweet = tweets.find_one({"id": tweet_id})
+            if detailed_tweet:
+                print(detailed_tweet)
+            else:
+                print("Tweet not found.")
+        else:
+            print("Invalid tweet ID entered.")
+
+
 def main():
     tweets = connect_to_mongodb()
 
-    if tweets != None:
+    if tweets is not None:
         end_program = False
         while not end_program:
-            user_input = input("Please select an option: \n1 - Search for tweets \n2 - Search for users \n6 - Exit the program \ninput: ")
+            user_input = input("Please select an option: \n1 - Search for tweets \n2 - Search for users \n3 - List top tweets \n4 - List top users \n5 - Compose a tweet \n6 - Exit the program \nInput: ")
             if user_input == "1":
                 search_tweets(tweets)
             elif user_input == "2":
                 search_users(tweets)
+            elif user_input == "3":
+                list_top_tweets(tweets)
+            elif user_input == "4":
+                list_top_users(tweets)
+            elif user_input == "5":
+                compose_tweet(tweets)
             elif user_input == "6":
                 end_program = True
+            else:
+                print("Invalid option. Please try again.")
     else:
         print("Exiting program due to connection error.")
 
-main()
+if __name__ == "__main__":
+    main()
