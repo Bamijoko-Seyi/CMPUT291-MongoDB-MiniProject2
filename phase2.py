@@ -1,7 +1,6 @@
 import pymongo
 from pymongo import MongoClient
 import pprint
-from datetime import datetime
 
 def connect_to_mongodb():
     try:
@@ -19,59 +18,45 @@ def connect_to_mongodb():
         return None
 
 def search_tweets(tweets):
-    exit_function = False
-    while not exit_function:
-        user_input = input("Enter keywords to search for tweets (separate by commas if they are multiple): ")
-        print()
+    while True:
+        user_input = input("Enter keywords to search for tweets, or type 'menu' to return: ")
+        if user_input.lower() == 'menu':
+            return
+
         keywords = user_input.split()
-
-        # Use the $text operator for text search
         query = {"content": {"$regex": ' '.join(keywords), "$options": "i"}}
-
         listed_results = list(tweets.find(query))
-        current_tweet_no = 1
-        for result in listed_results:
-            result["tweet_no"] = current_tweet_no
-            current_tweet_no += 1
 
-        if len(listed_results) == 0:
-            print("No results")
-        else:
-            for result in listed_results:
-                username_value = result.get("user", {}).get("username", "N/A")
-                print(f'tweet no: {result["tweet_no"]} | id: {result["id"]} | date: {result["date"]} | username: {username_value} | content: {result["content"]}')
-                print()
+        for index, result in enumerate(listed_results, start=1):
+            print(f"Tweet {index}:")
+            print(f"  ID: {result['id']}")
+            print(f"  Date: {result['date']}")
+            print(f"  Content: {result['content']}")
+            print(f"  Username: {result.get('user', {}).get('username', 'N/A')}\n")
 
-        while True:
-            user_input = input("Options: \n1 - Show more information on a tweet \n2 - Search for another tweet \n3 - Go back \nInput: ")
-            print()
-            if user_input == "1":
-                target_input = input("Please enter one of the tweet numbers displayed: ")
-                while not any(int(target_input) == result['tweet_no'] for result in listed_results):
-                    target_input = input("Invalid. No tweet has that tweet number. Please enter a valid number: ")
-                    print()
+        if not listed_results:
+            print("No results found.")
+            continue
 
-                for result in listed_results:
-                    if result["tweet_no"] == int(target_input):
-                        target_result = result
-                        break
-                username_value = target_result.get("user", {}).get("username", "N/A")
-                print(f'url: {target_result["url"]} | date: {target_result["date"]} | content: {target_result["content"]} | rendered content: {target_result["renderedContent"]}')
-                print(f'username: {username_value} | outlinks: {target_result["outlinks"]} | tcooutlinks: {target_result["tcooutlinks"]} | ')
-                print(f'replyCount: {target_result["replyCount"]} | retweetCount: {target_result["retweetCount"]} | likeCount: {target_result["likeCount"]}')
-                print(f'quoteCount: {target_result["quoteCount"]} | conversationId: {target_result["conversationId"]} | lang: {target_result["lang"]} | source: {target_result["source"]} | sourceUrl: {target_result["sourceUrl"]} | sourceLabel: {target_result["sourceLabel"]}')
-                print()
-            elif user_input == "2":
-                break
-            elif user_input == "3":
-                exit_function = True
-                break
+        tweet_selection = input("Enter the number of the tweet to see full details, or type 'menu' to return: ")
+        if tweet_selection.lower() == 'menu':
+            return
+
+        try:
+            tweet_number = int(tweet_selection)
+            if 0 < tweet_number <= len(listed_results):
+                selected_tweet = listed_results[tweet_number - 1]
+                pprint.pprint(selected_tweet)
+            else:
+                print("Invalid tweet number entered.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
 
 def search_users(tweets):
-    exit_function = False
-    while exit_function == False:
-        user_input = input("Enter a keyword to search for : ")
-        print()
+    while True:
+        user_input = input("Enter a keyword to search for, or type 'menu' to return: ")
+        if user_input.lower() == 'menu':
+            return
 
         username_query = {"user.username": {"$regex": user_input, "$options": "i"}}
         username_results = list(tweets.find(username_query))
@@ -81,108 +66,60 @@ def search_users(tweets):
 
         merged_results = username_results + [location for location in location_results if "user" in location and "id" in location["user"] and location["user"]["id"] not in [user["user"]["id"] for user in username_results]]
 
-        current_tweet_no = 1
-        for result in merged_results:
-            result["user_no"] = current_tweet_no
-            current_tweet_no += 1
-        if len(merged_results) == 0:
-            print("No results")
-        else:
-            for result in merged_results:
-                username_value = result.get("user", {}).get("username", "N/A")
-                displayname_value = result.get("user", {}).get("displayname", "N/A")
-                location_value = result.get("user", {}).get("location", "N/A")
-                print(f'user no: {result["user_no"]} | username: {username_value} | displayname: {displayname_value} | location: {location_value}')
+        for index, result in enumerate(merged_results, start=1):
+            print(f"User {index}:")
+            user = result.get("user", {})
+            print(f"  Username: {user.get('username', 'N/A')}")
+            print(f"  Display Name: {user.get('displayname', 'N/A')}")
+            print(f"  Location: {user.get('location', 'N/A')}\n")
 
-        while True:
-            user_input = input("Options: \n1 - Show more information on a user \n2 - Search for another user \n3 - Go back \nInput: ")
-            print()
-            if user_input == "1":
-                target_input = input("Please enter one of the user numbers displayed: ")
-                while not any(int(target_input) == result['user_no'] for result in merged_results):
-                    target_input = input("Invalid. No user has that user number. Please enter a valid number: ")
-                    print()
+        if not merged_results:
+            print("No results found.")
+            continue
 
-                for result in merged_results:
-                    if result["user_no"] == int(target_input):
-                        target_result = result
-                        break
+        user_selection = input("Enter the number of the user to see full details, or type 'menu' to return: ")
+        if user_selection.lower() == 'menu':
+            return
 
-                #Will find a more tidy solution later
-                username_value = target_result.get("user", {}).get("username", "N/A")
-                displayname_value = target_result.get("user", {}).get("displayname", "N/A")
-                id_value = target_result.get("user", {}).get("id", "N/A")
-                description_value = target_result.get("user", {}).get("description", "N/A")
-                created_value = target_result.get("user", {}).get("created", "N/A")
-                followers_count_value = target_result.get("user", {}).get("followersCount", "N/A")
-                friends_count_value = target_result.get("user", {}).get("friendsCount", "N/A")
-                statuses_count_value = target_result.get("user", {}).get("statusesCount", "N/A")
-                favourites_count_value = target_result.get("user", {}).get("favouritesCount", "N/A")
-                listed_count_value = target_result.get("user", {}).get("listedCount", "N/A")
-                media_count_value = target_result.get("user", {}).get("mediaCount", "N/A")
-                location_value = target_result.get("user", {}).get("location", "N/A")
-                protected_value = target_result.get("user", {}).get("protected", "N/A")
-                profile_image_url_value = target_result.get("user", {}).get("profileImageUrl", "N/A")
-                profile_banner_url_value = target_result.get("user", {}).get("profileBannerUrl", "N/A")
-                url_value = target_result.get("user", {}).get("url", "N/A")
-
-                print(f'username: {username_value} | displayname: {displayname_value} | id: {id_value} | description: {description_value}')
-                print(f'created: {created_value} | followersCount: {followers_count_value} | friendsCount: {friends_count_value}')
-                print(f'statusesCount: {statuses_count_value} | favouritesCount: {favourites_count_value} | listedCount: {listed_count_value}')
-                print(f'mediaCount: {media_count_value} | location: {location_value} | protected: {protected_value}')
-                print(f'profileImageUrl: {profile_image_url_value} | profileBannerUrl: {profile_banner_url_value} | url: {url_value}')
-
-            elif user_input == "2":
-                break
-            elif user_input == "3":
-                exit_function = True
-                break
+        try:
+            user_number = int(user_selection)
+            if 0 < user_number <= len(merged_results):
+                selected_user = merged_results[user_number - 1]
+                pprint.pprint(selected_user.get("user", {}))
+            else:
+                print("Invalid user number entered.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
 
 def list_top_tweets(tweets):
-    field = input("Enter the field to sort by (retweetCount, likeCount, quoteCount): ")
-    if field not in ['retweetCount', 'likeCount', 'quoteCount']:
-        print("Invalid field. Please enter one of 'retweetCount', 'likeCount', 'quoteCount'.")
-        return
+    while True:
+        field_input = input("Enter the field to sort by (retweetCount, likeCount, quoteCount), or type 'menu' to return: ")
+        if field_input.lower() == 'menu':
+            return
 
-    try:
-        n = int(input("Enter the number of top tweets to list: "))
-    except ValueError:
-        print("Invalid number entered.")
-        return
+        if field_input not in ['retweetCount', 'likeCount', 'quoteCount']:
+            print("Invalid field. Please enter one of 'retweetCount', 'likeCount', 'quoteCount'.")
+            continue
 
-    results = tweets.find().sort(field, pymongo.DESCENDING).limit(n)
-    tweet_ids = []
-    for tweet in results:
-        tweet_ids.append(tweet["id"])
-        print(f'ID: {tweet["id"]} | Date: {tweet["date"]} | Content: {tweet["content"]} | Username: {tweet["user"]["username"]}')
+        try:
+            n = int(input("Enter the number of top tweets to list: "))
+        except ValueError:
+            print("Invalid number entered.")
+            continue
 
-    tweet_id = input("Enter tweet ID to see full details or press Enter to go back: ")
-    if tweet_id:
-        if tweet_id in tweet_ids:
-            detailed_tweet = tweets.find_one({"id": tweet_id})
-            if detailed_tweet:
-                print(detailed_tweet)
-            else:
-                print("Tweet not found.")
-        else:
-            print("Invalid tweet ID entered.")
-            
-def compose_tweet(tweets):
-    content = input("Enter the tweet content: ")
-    tweet_doc = {
-        "content": content,
-        "date": datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z"),  # Set date to current system date
-        "user": {
-            "username": "291user"
-        }
-    }
+        results = tweets.find().sort(field_input, pymongo.DESCENDING).limit(n)
+        tweet_list = list(results)
 
-    result = tweets.insert_one(tweet_doc)
-    
-    if result.inserted_id:
-        print("Tweet successfully composed and inserted into the database.")
-    else:
-        print("Failed to compose and insert the tweet.")
+        for index, tweet in enumerate(tweet_list, start=1):
+            print(f"Tweet {index}:")
+            print(f"  ID: {tweet['id']}")
+            print(f"  Date: {tweet['date']}")
+            print(f"  Content: {tweet['content']}")
+            print(f"  Username: {tweet['user']['username']}\n")
+
+        tweet_selection = input("Enter the number of the tweet to see full details, or type 'menu' to return: ")
+        if tweet_selection.lower() == 'menu':
+            return
 
 def main():
     tweets = connect_to_mongodb()
