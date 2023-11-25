@@ -1,6 +1,7 @@
 import pymongo
 from pymongo import MongoClient
 import pprint
+from datetime import datetime
 
 def connect_to_mongodb():
     try:
@@ -165,7 +166,23 @@ def list_top_tweets(tweets):
                 print("Tweet not found.")
         else:
             print("Invalid tweet ID entered.")
+            
+def compose_tweet(tweets):
+    content = input("Enter the tweet content: ")
+    tweet_doc = {
+        "content": content,
+        "date": datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z"),  # Set date to current system date
+        "user": {
+            "username": "291user"
+        }
+    }
 
+    result = tweets.insert_one(tweet_doc)
+    
+    if result.inserted_id:
+        print("Tweet successfully composed and inserted into the database.")
+    else:
+        print("Failed to compose and insert the tweet.")
 
 def main():
     tweets = connect_to_mongodb()
