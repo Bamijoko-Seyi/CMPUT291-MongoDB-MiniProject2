@@ -59,7 +59,7 @@ def search_users(tweets):
         if user_input.lower() == 'menu':
             return
 
-        username_query = {"user.username": {"$regex": user_input, "$options": "i"}}
+        username_query = {"user.displayname": {"$regex": user_input, "$options": "i"}}
         username_results = list(tweets.find(username_query))
 
         location_query = {"user.location": {"$regex": user_input, "$options": "i"}}
