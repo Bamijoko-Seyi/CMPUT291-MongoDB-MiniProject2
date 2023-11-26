@@ -1,10 +1,8 @@
 import argparse
-import json
-from concurrent.futures import ThreadPoolExecutor
+import pymongo
 from pymongo import MongoClient
-
-def insert_batch(batch, collection):
-    collection.insert_many(batch)
+from pymongo import TEXT
+import os
 
 def main():
     parser = argparse.ArgumentParser(description="Load json script")
@@ -12,31 +10,16 @@ def main():
     parser.add_argument("--port", help="Port for the program", required=True)
     args = parser.parse_args()
 
-    with open(args.json, 'r') as json_file:
-        json_data = json.load(json_file)
-
-    client = MongoClient("mongodb://localhost:"+ args.port)
+    client = MongoClient('mongodb://localhost:'+ args.port)
     db = client["291db"]
 
-    if "tweets" in db.list_collection_names():
-        db["tweets"].drop()
-
     tweets = db["tweets"]
+    tweets.drop()
 
-    # Set your desired batch size
-    batch_size = 10000
-    num_insertion_workers = 20
+    os.system('mongoimport --db=291db --collection=tweets --port={} --file={} --batchSize=10000 --numInsertionWorkers=20'.format(args.port,args.json))
 
-    # Break the data into batches
-    batches = [json_data[i:i + batch_size] for i in range(0, len(json_data), batch_size)]
+    print("Json file successfully imported!")        
 
-    # Use ThreadPoolExecutor for parallel insertion
-    with ThreadPoolExecutor(max_workers=num_insertion_workers) as executor:
-        futures = [executor.submit(insert_batch, batch, tweets) for batch in batches]
-
-    # Wait for all threads to complete
-    for future in futures:
-        future.result()
 
 if __name__ == "__main__":
     main()
