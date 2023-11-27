@@ -121,6 +121,56 @@ def list_top_tweets(tweets):
         tweet_selection = input("Enter the number of the tweet to see full details, or type 'menu' to return: ")
         if tweet_selection.lower() == 'menu':
             return
+
+def list_top_users(tweets):
+    n = input("Enter the number of users you would like to list: ")
+    print()
+    while not n.isdigit():
+        n = input("Invalid. Please enter a valid number: ")
+        print()
+
+    results = list(tweets.find().sort("user.followersCount", pymongo.DESCENDING).limit(int(n)))
+    user_index_to_id_map = {}
+
+    while True:
+        for index, result in enumerate(sorted_users, start = 1):
+            user = result.get("user", {})
+            user_id, username, display_name = user.get('id', 'N/A'), user.get('username', 'N/A'), user.get('displayname', 'N/A')
+            followers_count = user.get('followersCount', 'N/A')
+            print(f"{index}. User ID: {user_id} | Username: {username:20} | Display name: {display_name:20} | Followers Count: {followers_count}")
+        print()
+
+        user_input = input("Options:\n1 - Select user\n2 - Go back\n\nInput: ")
+        print()
+        while user_input not in ["1", "2"]:
+            user_input = input("Invalid. Please select from one of the following options:\n1 - Select user\n2 - Go back\n\nInput: ")
+            print()
+
+        if user_input == "1":
+            while True:
+                user_input = input("Select a user by number to see more information: ")
+                print()
+                while not user_input.isdigit():
+                    user_input = input("Invalid selection. Please select one of the numbers displayed above: ")
+                    print()
+                
+                selected_user = int(user_input) - 1
+                user_index = user_index_to_id_map[selected_user]
+                user_info = tweets.find_one({'id': user_index})
+
+                if user_info:
+                    print(user_info)
+                    print()
+                else:
+                    print("User information not found.\n")
+                
+                user_input = input("Options:\n1 - Go back\n\nInput: ")
+                while user_input != "1":
+                    user_input = input("Invalid. Please select one of the following options:\n1 - Go back\n\nInput: ")
+                break
+
+        else:
+            break
             
 def compose_tweet(tweets):
     content = input("Enter the tweet content: ")
