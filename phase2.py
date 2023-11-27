@@ -145,6 +145,7 @@ def list_top_users(tweets):
             user = result.get("user", {})
             user_id, username, display_name = user.get('id', 'N/A'), user.get('username', 'N/A'), user.get('displayname', 'N/A')
             followers_count = user.get('followersCount', 'N/A')
+            user_index_to_id_map[index] = user_id
             print(f"{index}. User ID: {user_id} | Username: {username:20} | Display name: {display_name:20} | Followers Count: {followers_count}")
         print()
 
