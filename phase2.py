@@ -6,6 +6,7 @@ from datetime import datetime
 def connect_to_mongodb():
     try:
         port_no = input("Please enter your port number: ")
+        print()
         client = MongoClient("mongodb://localhost:" + port_no)
         db = client["291db"]
         tweets = db["tweets"]
@@ -15,12 +16,13 @@ def connect_to_mongodb():
 
         return tweets
     except pymongo.errors.ConnectionFailure as error:
-        print(f"Error connecting to MongoDB: {error}")
+        print(f"Error connecting to MongoDB: {error}\n")
         return None
 
 def search_tweets(tweets):
     while True:
         user_input = input("Enter keywords to search for tweets, or type 'menu' to return: ")
+        print()
         if user_input.lower() == 'menu':
             return
 
@@ -36,10 +38,11 @@ def search_tweets(tweets):
             print(f"  Username: {result.get('user', {}).get('username', 'N/A')}\n")
 
         if not listed_results:
-            print("No results found.")
+            print("No results found.\n")
             continue
 
         tweet_selection = input("Enter the number of the tweet to see full details, or type 'menu' to return: ")
+        print()
         if tweet_selection.lower() == 'menu':
             return
 
@@ -49,13 +52,14 @@ def search_tweets(tweets):
                 selected_tweet = listed_results[tweet_number - 1]
                 pprint.pprint(selected_tweet)
             else:
-                print("Invalid tweet number entered.")
+                print("Invalid tweet number entered.\n")
         except ValueError:
-            print("Invalid input. Please enter a number.")
+            print("Invalid input. Please enter a number.\n")
 
 def search_users(tweets):
     while True:
         user_input = input("Enter a keyword to search for, or type 'menu' to return: ")
+        print()
         if user_input.lower() == 'menu':
             return
 
@@ -75,10 +79,11 @@ def search_users(tweets):
             print(f"  Location: {user.get('location', 'N/A')}\n")
 
         if not merged_results:
-            print("No results found.")
+            print("No results found.\n")
             continue
 
         user_selection = input("Enter the number of the user to see full details, or type 'menu' to return: ")
+        print()
         if user_selection.lower() == 'menu':
             return
 
@@ -88,24 +93,26 @@ def search_users(tweets):
                 selected_user = merged_results[user_number - 1]
                 pprint.pprint(selected_user.get("user", {}))
             else:
-                print("Invalid user number entered.")
+                print("Invalid user number entered.\n")
         except ValueError:
-            print("Invalid input. Please enter a number.")
+            print("Invalid input. Please enter a number.\n")
 
 def list_top_tweets(tweets):
     while True:
         field_input = input("Enter the field to sort by (retweetCount, likeCount, quoteCount), or type 'menu' to return: ")
+        print()
         if field_input.lower() == 'menu':
             return
 
         if field_input not in ['retweetCount', 'likeCount', 'quoteCount']:
-            print("Invalid field. Please enter one of 'retweetCount', 'likeCount', 'quoteCount'.")
+            print("Invalid field. Please enter one of 'retweetCount', 'likeCount', 'quoteCount'.\n")
             continue
 
         try:
             n = int(input("Enter the number of top tweets to list: "))
+            print()
         except ValueError:
-            print("Invalid number entered.")
+            print("Invalid number entered.\n")
             continue
 
         results = tweets.find().sort(field_input, pymongo.DESCENDING).limit(n)
@@ -119,6 +126,7 @@ def list_top_tweets(tweets):
             print(f"  Username: {tweet['user']['username']}\n")
 
         tweet_selection = input("Enter the number of the tweet to see full details, or type 'menu' to return: ")
+        print()
         if tweet_selection.lower() == 'menu':
             return
 
@@ -174,6 +182,7 @@ def list_top_users(tweets):
             
 def compose_tweet(tweets):
     content = input("Enter the tweet content: ")
+    print()
     tweet_doc = {
         "content": content,
         "date": datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z"),  # Set date to current system date
@@ -184,9 +193,9 @@ def compose_tweet(tweets):
     result = tweets.insert_one(tweet_doc)
     
     if result.inserted_id:
-        print("Tweet successfully composed and inserted into the database.")
+        print("Tweet successfully composed and inserted into the database.\n")
     else:
-        print("Failed to compose and insert the tweet.")
+        print("Failed to compose and insert the tweet.\n")
         
 def main():
     tweets = connect_to_mongodb()
@@ -194,7 +203,7 @@ def main():
     if tweets is not None:
         end_program = False
         while not end_program:
-            user_input = input("Please select an option: \n1 - Search for tweets \n2 - Search for users \n3 - List top tweets \n4 - List top users \n5 - Compose a tweet \n6 - Exit the program \nInput: ")
+            user_input = input("Options:\n1 - Search for tweets\n2 - Search for users\n3 - List top tweets\n4 - List top users\n5 - Compose a tweet\n6 - Exit the program\n\nInput: ")
             if user_input == "1":
                 search_tweets(tweets)
             elif user_input == "2":
@@ -208,9 +217,9 @@ def main():
             elif user_input == "6":
                 end_program = True
             else:
-                print("Invalid option. Please try again.")
+                print("Invalid option. Please try again.\n")
     else:
-        print("Exiting program due to connection error.")
+        print("Exiting program due to connection error.\n")
 
 if __name__ == "__main__":
     main()
