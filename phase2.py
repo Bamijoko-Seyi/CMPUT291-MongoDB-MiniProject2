@@ -141,7 +141,7 @@ def list_top_users(tweets):
     user_index_to_id_map = {}
 
     while True:
-        for index, result in enumerate(sorted_users, start = 1):
+        for index, result in enumerate(results, start = 1):
             user = result.get("user", {})
             user_id, username, display_name = user.get('id', 'N/A'), user.get('username', 'N/A'), user.get('displayname', 'N/A')
             followers_count = user.get('followersCount', 'N/A')
@@ -203,7 +203,8 @@ def main():
     if tweets is not None:
         end_program = False
         while not end_program:
-            user_input = input("Options:\n1 - Search for tweets\n2 - Search for users\n3 - List top tweets\n4 - List top users\n5 - Compose a tweet\n6 - Exit the program\n\nInput: ")
+            user_input = input("Welcome to Fake Twitter 2.0!\n\nOptions:\n1 - Search for tweets\n2 - Search for users\n3 - List top tweets\n4 - List top users\n5 - Compose a tweet\n6 - Exit the program\n\nInput: ")
+            print()
             if user_input == "1":
                 search_tweets(tweets)
             elif user_input == "2":
