@@ -175,7 +175,7 @@ def list_top_users(tweets):
                         break
 
                 if user_info:
-                    print(user_info)
+                    pprint.pprint(user_info)
                     print()
                 else:
                     print("User information not found.\n")
