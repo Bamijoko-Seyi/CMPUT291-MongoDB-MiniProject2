@@ -163,9 +163,16 @@ def list_top_users(tweets):
                     user_input = input("Invalid selection. Please select one of the numbers displayed above: ")
                     print()
                 
-                selected_user = int(user_input) - 1
-                user_index = user_index_to_id_map[selected_user]
-                user_info = tweets.find_one({'id': user_index})
+                selected_user_id = user_index_to_id_map[int(user_input) - 1]
+                
+                user_id = ''
+                user_info = ''
+                for result in results:
+                    user = result.get("user", {})
+                    user_id = user.get("id", "N/A")
+                    if user_id == selected_user_id:
+                        user_info = result
+                        break
 
                 if user_info:
                     print(user_info)
