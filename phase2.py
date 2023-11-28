@@ -223,7 +223,7 @@ def compose_tweet(tweets):
     print()
     tweet_doc = {
         "content": content,
-        "date": datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z"),  # Set date to current system date
+        "date": datetime.now().strftime("%Y-%m-%d"),  # Set date to current system date
         "user": {
             "username": "291user"
         }
