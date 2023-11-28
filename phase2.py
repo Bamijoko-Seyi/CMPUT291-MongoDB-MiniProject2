@@ -47,10 +47,11 @@ def search_tweets(tweets):
             print(f"  Username: {result.get('user', {}).get('username', 'N/A')}\n")
 
         if not matched_tweets:
-            print("No results found.")
+            print("No results found.\n")
             continue
 
         tweet_selection = input("Enter the number of the tweet to see full details, or type 'menu' to return: ")
+        print()
         if tweet_selection.lower() == 'menu':
             return
 
