@@ -41,8 +41,8 @@ def search_tweets(tweets):
         for index, result in enumerate(listed_results, start=1):
             print(f"Tweet {index}:")
             print(f"  ID: {result.get('id', 'N/A')}")
-            print(f"  Date: {result['date']}")
-            print(f"  Content: {result['content']}")
+            print(f"  Date: {result.get('date','N/A')}")
+            print(f"  Content: {result.get('content','N/A')}")
             print(f"  Username: {result.get('user', {}).get('username', 'N/A')}\n")
 
         if not listed_results:
@@ -71,13 +71,22 @@ def search_users(tweets):
             return
 
         pattern = r'\b' + re.escape(user_input) + r'\b'
-        username_query = {"user.displayname": {"$regex": pattern, "$options": "i"}}
-        username_results = list(tweets.find(username_query))
+        query = {
+            "$or": [
+                {"user.displayname": {"$regex": pattern, "$options": "i"}},
+                {"user.location": {"$regex": pattern, "$options": "i"}}
+            ]
+        }
+        results = list(tweets.find(query))
 
-        location_query = {"user.location": {"$regex": pattern, "$options": "i"}}
-        location_results = list(tweets.find(location_query))
+        unique_users = set()
+        merged_results = []
 
-        merged_results = username_results + [location for location in location_results if "user" in location and "id" in location["user"] and location["user"]["id"] not in [user["user"]["id"] for user in username_results]]
+        for result in results:
+            user_id = result.get("user", {}).get("id")
+            if user_id and user_id not in unique_users:
+                unique_users.add(user_id)
+                merged_results.append(result)
 
         for index, result in enumerate(merged_results, start=1):
             print(f"User {index}:")
