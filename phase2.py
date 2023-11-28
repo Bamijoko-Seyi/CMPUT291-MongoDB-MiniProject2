@@ -27,17 +27,10 @@ def search_tweets(tweets):
         if user_input.lower() == 'menu':
             return
 
-        keywords = user_input.split()
-        query = {"content": {"$regex": ' '.join(keywords), "$options": "i"}}
-        listed_results = list(tweets.find(query))
-
-        matched_tweets = []
-        for keyword in keywords:
-            pattern = r'\b' + re.escape(keyword) + r'\b'
-
-            for result in listed_results:
-                if re.search(pattern, result['content'], flags=re.IGNORECASE):
-                    matched_tweets.append(result)
+        keywords = user_input.split(',')
+        keyword_queries = [{"content": {"$regex": f"\\b{re.escape(keyword)}\\b", "$options": "i"}} for keyword in keywords]
+        query = {"$and": keyword_queries}
+        matched_tweets = list(tweets.find(query))
 
         for index, result in enumerate(matched_tweets, start=1):
             print(f"Tweet {index}:")
