@@ -152,7 +152,6 @@ def list_top_tweets(tweets):
         except ValueError:
             print("Invalid input. Please enter a number.")
 
-
 def list_top_users(tweets):
     n = input("Enter the number of users you would like to list: ")
     print()
@@ -188,8 +187,7 @@ def list_top_users(tweets):
                 
                 selected_user_id = user_index_to_id_map[int(user_input) - 1]
                 
-                user_id = ''
-                user_info = ''
+                user_id, user_info = '', ''
                 for result in results:
                     user = result.get("user", {})
                     user_id = user.get("id", "N/A")
