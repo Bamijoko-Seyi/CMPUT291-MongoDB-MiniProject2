@@ -212,15 +212,28 @@ def list_top_users(tweets):
 def compose_tweet(tweets):
     content = input("Enter the tweet content: ")
     print()
-    tweet_doc = {
-        "content": content,
-        "date": datetime.now().strftime("%Y-%m-%d"),  # Set date to current system date
+
+    # Define a base tweet template
+    tweet_template = {
+        "content": None, "date": None, "id": None, "replyCount": None, "retweetCount": None,
+        "likeCount": None, "quoteCount": None, "conversationId": None, "lang": None,
+        "source": None, "sourceUrl": None, "sourceLabel": None, "outlinks": None,
+        "tcooutlinks": None, "renderedContent": None,
         "user": {
-            "username": "291user"
+            "username": None, "displayname": None, "location": None, "followersCount": None,
+            "friendsCount": None, "statusesCount": None, "favouritesCount": None,
+            "listedCount": None, "mediaCount": None, "protected": None,
+            "profileImageUrl": None, "profileBannerUrl": None, "url": None
         }
     }
-    result = tweets.insert_one(tweet_doc)
-    
+
+    # Update necessary fields for the new tweet
+    tweet_template["content"] = content
+    tweet_template["date"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    tweet_template["user"]["username"] = "291user"
+
+    result = tweets.insert_one(tweet_template)
+
     if result.inserted_id:
         print("Tweet successfully composed and inserted into the database.\n")
     else:
