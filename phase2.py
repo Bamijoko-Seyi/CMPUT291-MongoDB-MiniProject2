@@ -2,6 +2,7 @@ import pymongo
 from pymongo import MongoClient
 import pprint
 from datetime import datetime
+import re
 
 def connect_to_mongodb():
     try:
@@ -69,10 +70,11 @@ def search_users(tweets):
         if user_input.lower() == 'menu':
             return
 
-        username_query = {"user.displayname": {"$regex": user_input, "$options": "i"}}
+        pattern = r'\b' + re.escape(user_input) + r'\b'
+        username_query = {"user.displayname": {"$regex": pattern, "$options": "i"}}
         username_results = list(tweets.find(username_query))
 
-        location_query = {"user.location": {"$regex": user_input, "$options": "i"}}
+        location_query = {"user.location": {"$regex": pattern, "$options": "i"}}
         location_results = list(tweets.find(location_query))
 
         merged_results = username_results + [location for location in location_results if "user" in location and "id" in location["user"] and location["user"]["id"] not in [user["user"]["id"] for user in username_results]]
