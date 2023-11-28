@@ -126,6 +126,10 @@ def list_top_tweets(tweets):
         results = tweets.find().sort(field_input, pymongo.DESCENDING).limit(n)
         tweet_list = list(results)
 
+        if not tweet_list:
+            print("No tweets found.")
+            continue
+
         for index, tweet in enumerate(tweet_list, start=1):
             print(f"Tweet {index}:")
             print(f"  ID: {tweet['id']}")
@@ -137,6 +141,17 @@ def list_top_tweets(tweets):
         print()
         if tweet_selection.lower() == 'menu':
             return
+
+        try:
+            tweet_number = int(tweet_selection)
+            if 0 < tweet_number <= len(tweet_list):
+                selected_tweet = tweet_list[tweet_number - 1]
+                pprint.pprint(selected_tweet)
+            else:
+                print("Invalid tweet number entered.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
 
 def list_top_users(tweets):
     n = input("Enter the number of users you would like to list: ")
