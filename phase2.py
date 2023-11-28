@@ -22,7 +22,6 @@ def connect_to_mongodb():
 def search_tweets(tweets):
     while True:
         user_input = input("Enter keywords to search for tweets, or type 'menu' to return: ")
-        print()
         if user_input.lower() == 'menu':
             return
 
@@ -30,19 +29,26 @@ def search_tweets(tweets):
         query = {"content": {"$regex": ' '.join(keywords), "$options": "i"}}
         listed_results = list(tweets.find(query))
 
+        matched_tweets = []
+        for keyword in keywords:
+            pattern = r'\b' + re.escape(keyword) + r'\b'
+
+            for result in listed_results:
+                if re.search(pattern, result['content'], flags=re.IGNORECASE):
+                    matched_tweets.append(result)
+
         for index, result in enumerate(listed_results, start=1):
             print(f"Tweet {index}:")
-            print(f"  ID: {result['id']}")
+            print(f"  ID: {result.get('id', 'N/A')}")
             print(f"  Date: {result['date']}")
             print(f"  Content: {result['content']}")
             print(f"  Username: {result.get('user', {}).get('username', 'N/A')}\n")
 
         if not listed_results:
-            print("No results found.\n")
+            print("No results found.")
             continue
 
         tweet_selection = input("Enter the number of the tweet to see full details, or type 'menu' to return: ")
-        print()
         if tweet_selection.lower() == 'menu':
             return
 
@@ -52,9 +58,9 @@ def search_tweets(tweets):
                 selected_tweet = listed_results[tweet_number - 1]
                 pprint.pprint(selected_tweet)
             else:
-                print("Invalid tweet number entered.\n")
+                print("Invalid tweet number entered.")
         except ValueError:
-            print("Invalid input. Please enter a number.\n")
+            print("Invalid input. Please enter a number.")
 
 def search_users(tweets):
     while True:
