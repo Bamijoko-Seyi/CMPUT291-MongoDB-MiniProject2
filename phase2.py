@@ -27,6 +27,7 @@ def search_tweets(tweets):
         if user_input.lower() == 'menu':
             return
 
+        # Find tweets that match the keyword
         keywords = user_input.split(',')
         keyword_queries = [{"content": {"$regex": f"\\b{re.escape(keyword)}\\b", "$options": "i"}} for keyword in keywords]
         query = {"$and": keyword_queries}
@@ -48,6 +49,7 @@ def search_tweets(tweets):
         if tweet_selection.lower() == 'menu':
             return
 
+        # Prints the full details of the tweet selected
         try:
             tweet_number = int(tweet_selection)
             if 0 < tweet_number <= len(listed_results):
@@ -65,7 +67,10 @@ def search_users(tweets):
         if user_input.lower() == 'menu':
             return
 
+        # Stops keywords from being matched partially
         pattern = r'\b' + re.escape(user_input) + r'\b'
+
+        # Query that searches for the users in which that their displayname and location fields match the keyword
         query = {
             "$or": [
                 {"user.displayname": {"$regex": pattern, "$options": "i"}},
@@ -77,6 +82,7 @@ def search_users(tweets):
         unique_users = set()
         merged_results = []
 
+        # Merges the users in which their displayname and location fields match the keyword, while removing duplicates
         for result in results:
             user_id = result.get("user", {}).get("id")
             if user_id and user_id not in unique_users:
@@ -98,7 +104,7 @@ def search_users(tweets):
         print()
         if user_selection.lower() == 'menu':
             return
-
+        # prints the full details of the user that was selected
         try:
             user_number = int(user_selection)
             if 0 < user_number <= len(merged_results):
@@ -127,6 +133,7 @@ def list_top_tweets(tweets):
             print("Invalid number entered.\n")
             continue
 
+        # Finds the top tweets based on the input of the user
         results = tweets.find().sort(field_input, pymongo.DESCENDING).limit(n)
         tweet_list = list(results)
 
@@ -146,6 +153,7 @@ def list_top_tweets(tweets):
         if tweet_selection.lower() == 'menu':
             return
 
+        # Prints the full details of the tweet that was selected
         try:
             tweet_number = int(tweet_selection)
             if 0 < tweet_number <= len(tweet_list):
@@ -165,7 +173,7 @@ def list_top_users(tweets):
         if not n.isdigit():
             print("Invalid. Please enter a valid number.\n")
             continue
-
+        # Get the the top users based on the number of followers and the input by the user
         results = list(tweets.aggregate([
                 {"$group": {"_id": "$user.id", "username": {"$first": "$user.username"}, "displayname": {"$first": "$user.displayname"}, "followersCount": {"$first": "$user.followersCount"}}},
                 {"$sort": {"followersCount": -1}},
@@ -175,6 +183,8 @@ def list_top_users(tweets):
         if not results:
             print("No users found.")
             continue
+
+        # Gets rid of duplicates
         else:
             no_duplicates = []
             for index, user in enumerate(results, start=1):
@@ -188,6 +198,7 @@ def list_top_users(tweets):
         if user_selection.lower() == 'menu':
             return
 
+        # Prints the full information of the tweet that is selected
         try:
             user_number = int(user_selection)
             if 0 < user_number <= len(results):
