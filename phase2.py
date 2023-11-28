@@ -229,7 +229,7 @@ def compose_tweet(tweets):
 
     # Update necessary fields for the new tweet
     tweet_template["content"] = content
-    tweet_template["date"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    tweet_template["date"] = datetime.now().strftime("%Y-%m-%d")
     tweet_template["user"]["username"] = "291user"
 
     result = tweets.insert_one(tweet_template)
